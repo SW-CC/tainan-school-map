@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Header 兩版比較｜齊家學區地圖</title>
+<style>
+  :root{ --blue:#1C3D65; --green:#407864; --accent-l:#7EAC96; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; background:#eef2f6; color:#20242b; padding:24px 16px 60px; }
+  .wrap{ max-width:820px; margin:0 auto; }
+  h2{ font-size:19px; color:var(--blue); margin:0 0 4px; }
+  .lead{ color:#5a6472; font-size:13.5px; margin:0 0 22px; line-height:1.6; }
+  .block{ margin-bottom:26px; }
+  .cap{ font-weight:800; font-size:15px; color:var(--blue); margin-bottom:2px; }
+  .cap span{ font-weight:500; color:#7a8190; font-size:13px; margin-left:6px; }
+  /* 真實 header bar */
+  .bar{ position:relative; background:linear-gradient(90deg,#16324f,var(--blue)); height:56px;
+        display:flex; align-items:center; gap:12px; padding:0 16px; border-bottom:2px solid var(--green);
+        border-radius:10px; box-shadow:0 4px 14px rgba(0,0,0,.18); overflow:hidden; }
+  .logo{ flex:none; display:flex; align-items:center; background:#fff; border-radius:9px; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+  .logo img{ width:auto; display:block; }
+  h1{ margin:0; font-size:16px; font-weight:800; letter-spacing:.5px; white-space:nowrap; line-height:1.25; color:#fff; }
+  h1 small{ display:block; font-size:11px; font-weight:500; color:var(--accent-l); letter-spacing:1px; line-height:1.35; margin-top:2px; }
+  /* 中線參考線 */
+  .mid{ position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(255,255,255,.28); }
+  /* 版本1:整塊置中(現況) — logo 46px */
+  .v1 .logo{ height:46px; padding:4px 8px; }
+  .v1 .logo img{ height:38px; }
+  /* 版本2:等高切齊 — logo 高度≈文字塊、頂底對齊 */
+  .v2 .logo{ height:38px; padding:3px 7px; align-self:center; }
+  .v2 .logo img{ height:32px; }
+  .v2 h1{ line-height:1.2; }
+  .pick{ margin-top:10px; }
+  .pick button{ border:0; background:var(--blue); color:#fff; font-weight:800; font-size:14px; padding:11px 20px; border-radius:9px; cursor:pointer; }
+  .pick button:hover{ background:#16324f; }
+  .tip{ font-size:12.5px; color:#7a8190; margin-top:8px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>左上角 Header 兩個版本</h2>
+  <p class="lead">下面是用<b>真正的齊家 logo</b>做的兩種排版。中間那條淡白線是 bar 的正中線，方便你看對齊。挑一個喜歡的，按下面的按鈕告訴我，我就套用到正式網站。</p>
+
+  <div class="block v1">
+    <div class="cap">版本 1<span>整塊垂直置中（目前正式站就是這個）</span></div>
+    <div class="bar">
+      <div class="mid"></div>
+      <div class="logo"><img src="logo-color.png" alt="齊家不動產"></div>
+      <h1>台南國中小學區地圖<small>齊家不動產 × 陪你買好房</small></h1>
+    </div>
+    <div class="pick"><button onclick="sendPrompt('header 用版本1：整塊垂直置中（維持現況）')">選版本 1</button></div>
+    <div class="tip">logo 較大（46px），標題＋副標當成一整塊、上下置中；logo 比文字塊高一點，上下會微微突出。</div>
+  </div>
+
+  <div class="block v2">
+    <div class="cap">版本 2<span>logo 與文字等高、上下切齊（較整齊）</span></div>
+    <div class="bar">
+      <div class="mid"></div>
+      <div class="logo"><img src="logo-color.png" alt="齊家不動產"></div>
+      <h1>台南國中小學區地圖<small>齊家不動產 × 陪你買好房</small></h1>
+    </div>
+    <div class="pick"><button onclick="sendPrompt('header 用版本2：logo 與標題副標等高、上下切齊')">選版本 2</button></div>
+    <div class="tip">logo 縮小到跟「標題＋副標」差不多高，logo 的上緣、下緣跟文字對齊，看起來是「一組等高的東西」，最整齊。</div>
+  </div>
+</div>
+<script>
+if(typeof sendPrompt!=='function'){ window.sendPrompt=function(t){ alert('請回到對話框，直接跟 AI 說：'+t); }; }
+</script>
+</body>
+</html>
