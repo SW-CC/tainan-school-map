@@ -51,9 +51,10 @@
 
   /* 學校位置標記 */
   .sch-ic{ background:none; border:0; }
-  .sch-pin{ width:24px; height:24px; border-radius:50%; background:var(--blue); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.42); display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .sch-pin:hover{ background:var(--gold); }
-  .sch-pin svg{ width:13px; height:13px; }
+  .sch-ic{ transform-origin:50% 100%; transition:transform .12s; cursor:pointer; filter:drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+  .sch-ic:hover{ transform:scale(1.16); z-index:1000; }
+  .sch-ic .pin-body{ transition:fill .12s; }
+  .sch-ic:hover .pin-body{ fill:var(--gold); }
 
   /* leaflet tweaks */
   .leaflet-tooltip.zone-label{ background:rgba(28,61,101,.92); color:#fff; border:0; border-radius:6px;
@@ -213,24 +214,24 @@ const store = {}; // level -> {feature, layer} list for search
 let SCHOOL_POINTS = {};
 const markerGroups = { gs:L.layerGroup(), jh:L.layerGroup() };
 let showPins = true;
-function schoolIcon(){ return L.divIcon({ className:'sch-ic', html:'<div class="sch-pin"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3.2 3.2 10.6V21h6.4v-5.6h4.8V21H21V10.6z"/></svg></div>', iconSize:[24,24], iconAnchor:[12,12] }); }
+function schoolIcon(){ return L.divIcon({ className:'sch-ic', html:'<svg width="26" height="34" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg"><path class="pin-body" d="M13 33S24 20.6 24 12.3C24 6 19.1 1 13 1S2 6 2 12.3C2 20.6 13 33 13 33Z" fill="#1C3D65" stroke="#fff" stroke-width="1.6"/><circle cx="13" cy="12" r="6.6" fill="#fff"/><path d="M13 8.1l6.1 2.6L13 13.3 6.9 10.7z" fill="#1C3D65"/><path d="M9.6 12.1v2.2c0 .9 1.5 1.6 3.4 1.6s3.4-.7 3.4-1.6v-2.2" fill="none" stroke="#1C3D65" stroke-width="1.1"/></svg>', iconSize:[26,34], iconAnchor:[13,33], popupAnchor:[0,-29] }); }
 
 function hue(i){ return (i*137.508)%360; }
-function colorFor(i){ return `hsl(${hue(i).toFixed(0)},62%,58%)`; }
-
-function styleFn(color){ return { color:'#ffffff', weight:1, fillColor:color, fillOpacity:.5 }; }
+function colorFor(i){ return `hsl(${hue(i).toFixed(0)},62%,60%)`; }
+function strokeFor(i){ return `hsl(${hue(i).toFixed(0)},72%,33%)`; }
+function styleFn(i){ return { color:strokeFor(i), weight:1.6, fillColor:colorFor(i), fillOpacity:.5 }; }
 
 function buildLayer(level, data){
   const schools = [...new Set(data.features.map(f=>f.properties.school))];
   const cidx = {}; schools.forEach((s,i)=>cidx[s]=i);
   store[level] = [];
   const lyr = L.geoJSON(data, {
-    style: f => styleFn(colorFor(cidx[f.properties.school])),
+    style: f => styleFn(cidx[f.properties.school]),
     onEachFeature: (f, l) => {
       const p = f.properties;
       l.bindTooltip(p.school.replace(p.home,''), {sticky:true, className:'zone-label', direction:'top', opacity:1});
       l.bindPopup(buildZonePopup(p), {maxWidth:344, maxHeight:380});
-      l.on('mouseover', ()=> l.setStyle({weight:2.5, color:var_gold, fillOpacity:.72}));
+      l.on('mouseover', ()=> l.setStyle({weight:3.2, color:'#12325a', fillOpacity:.68}));
       l.on('mouseout',  ()=> lyr.resetStyle(l));
       const pt = SCHOOL_POINTS[p.school];
       let mk = null;
