@@ -27,6 +27,8 @@ with open('tn_addr.csv', encoding='utf-8-sig', newline='') as f:
         dist = code2dist.get(code)
         if not dist or not li or not hao: continue
         road = road or area or li   # 鄉下無路名時退地區/里
+        xiang = xiang.translate(FW).replace('巷','').strip()   # 全形→半形、去「巷」字,對齊前端parseAddr
+        nong = nong.translate(FW).replace('弄','').strip()
         k = norm_hao(hao)
         if not k or not k[0].isdigit(): continue
         try: kn = int(kin)
