@@ -6,7 +6,7 @@
 <title>台南國中小學區地圖｜陪你買好房</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  :root{ --blue:#1C3D65; --gold:#C9A84C; --cream:#EFEDE7; --ink:#20242b; }
+  :root{ --blue:#1C3D65; --navy-d:#062345; --gold:#407864; --green-l:#5E8472; --accent-l:#7EAC96; --grey:#DCDDDD; --grey-l:#F5F6F7; --cream:#DCDDDD; --ink:#20242b; }
   *{ box-sizing:border-box; }
   html,body{ margin:0; height:100%; font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; color:var(--ink); }
   #map{ position:absolute; inset:0; background:#e8e8e8; }
@@ -16,15 +16,16 @@
         background:linear-gradient(90deg,#16324f,var(--blue)); color:#fff;
         display:flex; align-items:center; gap:12px; padding:0 16px;
         border-bottom:2px solid var(--gold); box-shadow:0 2px 12px rgba(0,0,0,.25); }
-  #bar .logo{ width:30px;height:30px;border-radius:7px;background:var(--gold);color:var(--blue);
-        display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;flex:none;}
+  #bar .logo{ height:38px; flex:none; display:flex; align-items:center; }
+  #bar .logo img{ height:38px; width:auto; display:block; }
+  #bar .logo svg{ height:34px; width:34px; }
   #bar h1{ font-size:16px; margin:0; font-weight:800; letter-spacing:.5px; white-space:nowrap; }
-  #bar h1 small{ display:block; font-size:11px; font-weight:500; color:var(--gold); letter-spacing:1px; }
+  #bar h1 small{ display:block; font-size:11px; font-weight:500; color:var(--accent-l); letter-spacing:1px; }
   #bar .grow{ flex:1; }
   #bar .lvl{ display:flex; background:rgba(255,255,255,.12); border-radius:9px; padding:3px; }
   #bar .lvl button{ border:0; background:transparent; color:#dfe6ef; font-size:14px; font-weight:700;
         padding:7px 15px; border-radius:7px; cursor:pointer; transition:.15s; }
-  #bar .lvl button.on{ background:var(--gold); color:var(--blue); }
+  #bar .lvl button.on{ background:var(--gold); color:#fff; }
 
   /* control panel */
   #panel{ position:fixed; top:68px; left:12px; z-index:1000; width:270px;
@@ -39,9 +40,10 @@
   .row{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:#333; }
   .muted{ color:#7a8190; font-size:12px; line-height:1.55; }
   #count{ font-weight:800; color:var(--blue); }
-  .btn-official{ display:block; text-align:center; text-decoration:none; background:var(--gold); color:#3a2f10;
+  .btn-official{ display:block; text-align:center; text-decoration:none; background:var(--gold); color:#fff;
         font-weight:800; font-size:13.5px; padding:9px; border-radius:8px; margin-top:2px; }
-  .disc{ background:#fff8e6; border:1px solid #f0dfa8; color:#7a5b12; border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.6; }
+  .disc{ background:var(--grey-l); border:1px solid var(--grey); color:#41505f; border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.6; }
+  .disc b{ color:var(--blue); }
   .toggle{ cursor:pointer; user-select:none; }
 
   /* legend chip */
@@ -53,13 +55,13 @@
   .leaflet-tooltip.zone-label:before{ display:none; }
   .leaflet-popup-content{ font-size:13.5px; line-height:1.7; }
   .pop-h{ font-weight:800; color:var(--blue); font-size:15px; }
-  .pop-t{ display:inline-block; background:var(--cream); color:#5b4a1e; border-radius:5px; padding:1px 7px; font-size:12px; font-weight:700; }
+  .pop-t{ display:inline-block; background:var(--cream); color:var(--blue); border-radius:5px; padding:1px 7px; font-size:12px; font-weight:700; }
 
   /* address lookup */
   #addr-box{ display:flex; gap:6px; }
   #addr-box input{ flex:1; border:1px solid #cfd2d8; border-radius:8px; padding:9px 10px; font-size:14px; outline:none; }
   #addr-box input:focus{ border-color:var(--blue); }
-  #addr-box button{ border:0; background:var(--gold); color:#3a2f10; border-radius:8px; padding:0 15px; font-weight:800; cursor:pointer; font-size:14px; }
+  #addr-box button{ border:0; background:var(--gold); color:#fff; border-radius:8px; padding:0 15px; font-weight:800; cursor:pointer; font-size:14px; }
   .rcard{ margin-top:9px; border-radius:10px; overflow:hidden; border:1px solid #e3e3e8; display:none; }
   .rcard.show{ display:block; }
   .rcard .rhead{ background:var(--blue); color:#fff; padding:7px 11px; font-size:13.5px; font-weight:800; }
@@ -73,7 +75,7 @@
   .tier.y .sch{ color:#8a5a12; } .tier.r .sch{ color:#9aa0aa; font-size:14px; }
   .tier .note{ font-size:11.5px; color:#8a6d1e; line-height:1.5; margin-top:1px; }
   .tier.g .note{ color:#9aa0aa; }
-  .rcard .rfoot{ padding:8px 11px; background:#fff8e6; border-top:1px solid #f0dfa8; font-size:11.5px; color:#7a5b12; line-height:1.55; }
+  .rcard .rfoot{ padding:8px 11px; background:var(--grey-l); border-top:1px solid var(--grey); font-size:11.5px; color:#41505f; line-height:1.55; }
   .rcard .rfoot a{ color:var(--blue); font-weight:800; }
   .addr-title{ font-weight:800; color:var(--blue); font-size:14px; margin-bottom:7px; }
 
@@ -89,8 +91,8 @@
 </head>
 <body>
 <div id="bar">
-  <div class="logo">陪</div>
-  <h1>台南國中小學區地圖<small>陪你買好房 × 齊家不動產</small></h1>
+  <div class="logo"><svg viewBox="0 0 40 34" aria-label="齊家不動產"><path d="M20 4 3 18h4v12h9v-7h4v7h9V18h4z" fill="#fff"/><path d="M27 11 40 22v9H25v-8h-3v8h-3v-9z" fill="#7EAC96"/></svg></div>
+  <h1>台南國中小學區地圖<small>齊家不動產 Khí-ke Real Estate</small></h1>
   <div class="grow"></div>
   <div class="lvl">
     <button id="btn-gs" class="on" onclick="switchLevel('gs')">國小</button>
@@ -177,7 +179,7 @@ function buildLayer(level, data){
   });
   return lyr;
 }
-const var_gold = '#C9A84C';
+const var_gold = '#1C3D65';
 
 function refreshLabels(level){
   store[level].forEach(o=>{
