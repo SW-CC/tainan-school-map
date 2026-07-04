@@ -52,11 +52,11 @@
     <h1>業務專屬連結產生器<small>齊家不動產 × 台南學區地圖</small></h1>
   </div>
   <div class="body">
-    <div class="note">填你的聯絡方式 → 產生你的專屬網址 → 傳給客戶。客戶打開後，地圖查詢泡泡與上方的<b>姓名／電話／LINE</b>都會是你的（齊家品牌、學區資料不變）。<br>此頁僅供業務使用，<b>請勿把此頁網址給客戶</b>——只傳「產生出來的連結」或 QR Code。</div>
-    <label>姓名<input id="name" maxlength="20" placeholder="王小明"></label>
-    <label>電話<input id="tel" maxlength="30" placeholder="0912-345-678"></label>
-    <label>LINE 加好友連結<input id="line" placeholder="https://lin.ee/...">
-      <span class="hint">LINE 官方帳號後台→加入好友指南，或個人 LINE→加入好友→邀請→複製連結。留空則用齊家公用 LINE。</span></label>
+    <div class="note">輸入你的<b>業務代號</b>（店長開通時給你的）→ 產生你的專屬網址 → 傳給客戶。客戶打開後，地圖查詢泡泡與上方的<b>姓名／電話／LINE</b>都會是你的（齊家品牌、學區資料不變）。<br>此頁僅供業務使用，<b>請勿把此頁網址給客戶</b>——只傳「產生出來的連結」或 QR Code。</div>
+    <label>業務代號<input id="code" maxlength="24" placeholder="例：amy" autocomplete="off">
+      <span class="hint">還沒有代號？聯絡店長開通（登記姓名、電話、LINE）。</span></label>
+    <div id="who" style="display:none;margin:-4px 0 13px;background:var(--grey-l);border:1px solid var(--grey);border-radius:9px;padding:9px 12px;font-size:13px;line-height:1.7"></div>
+    <div id="err" style="display:none;margin:-4px 0 13px;color:#a33c2e;font-size:13px;font-weight:700"></div>
     <button class="gen" onclick="gen()">產生我的專屬連結</button>
     <div id="out">
       <div class="olbl">✅ 你的專屬分享連結（傳這個給客戶）</div>
@@ -76,11 +76,23 @@
 </div>
 <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
-function gen(){
-  const n=document.getElementById('name').value.trim(), t=document.getElementById('tel').value.trim(), l=document.getElementById('line').value.trim();
-  if(!n){ document.getElementById('name').focus(); return; }
+function esc(s){ return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+let ROSTER=null;
+async function roster(){ if(!ROSTER){ ROSTER=await fetch('agents.json?t='+Date.now()).then(r=>r.json()); } return ROSTER; }
+async function gen(){
+  const code=document.getElementById('code').value.trim().toLowerCase();
+  const who=document.getElementById('who'), err=document.getElementById('err');
+  who.style.display='none'; err.style.display='none';
+  document.getElementById('out').classList.remove('show');
+  if(!code){ document.getElementById('code').focus(); return; }
+  let j={};
+  try{ j=await roster(); }catch(_){ err.textContent='名冊載入失敗，請稍後再試'; err.style.display='block'; return; }
+  const rec=j[code];
+  if(!rec){ err.textContent='「'+code+'」尚未登記，請聯絡店長開通代號。'; err.style.display='block'; return; }
+  who.innerHTML='✅ 已登記：<b>'+esc(rec.name)+'</b>　'+esc(rec.tel||'')+(rec.line?'　<span style="color:#06934a;font-weight:700">LINE ✓</span>':'　（用齊家公用 LINE）');
+  who.style.display='block';
   const u=new URL(location.origin+'/');
-  if(n) u.searchParams.set('name',n); if(t) u.searchParams.set('tel',t); if(l) u.searchParams.set('line',l);
+  u.searchParams.set('a',code);
   const url=u.toString();
   const a=document.getElementById('ulink'); a.textContent=url; a.href=url;
   document.getElementById('prev').href=url;
