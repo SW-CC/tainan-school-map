@@ -14,12 +14,12 @@
   /* top brand bar */
   #bar{ position:fixed; top:0; left:0; right:0; z-index:1000; height:56px;
         background:linear-gradient(90deg,#16324f,var(--blue)); color:#fff;
-        display:flex; align-items:center; gap:12px; padding:0 16px;
+        display:flex; align-items:center; gap:9px; padding:0 16px;
         border-bottom:2px solid var(--gold); box-shadow:0 2px 12px rgba(0,0,0,.25); }
-  #bar .logo{ flex:none; display:flex; align-items:center; background:#fff; border-radius:9px; padding:3px 7px; height:38px; box-shadow:0 1px 4px rgba(0,0,0,.2); }
-  #bar .logo img{ height:32px; width:auto; display:block; }
-  #bar h1{ font-size:16px; margin:0; font-weight:800; letter-spacing:.5px; white-space:nowrap; line-height:1.25; }
-  #bar h1 small{ display:block; font-size:11px; font-weight:500; color:var(--accent-l); letter-spacing:1px; line-height:1.35; margin-top:2px; }
+  #bar .logo{ flex:none; display:flex; align-items:center; background:#fff; border-radius:7px; padding:2px 6px; height:31px; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+  #bar .logo img{ height:26px; width:auto; display:block; }
+  #bar h1{ font-size:16px; margin:0; font-weight:800; letter-spacing:.5px; white-space:nowrap; line-height:1; }
+  #bar h1 small{ display:block; font-size:11px; font-weight:500; color:var(--accent-l); letter-spacing:1px; line-height:1; margin-top:4px; }
   #bar .grow{ flex:1; }
   #bar .lvl{ display:flex; background:rgba(255,255,255,.12); border-radius:9px; padding:3px; }
   #bar .lvl button{ border:0; background:transparent; color:#dfe6ef; font-size:14px; font-weight:700;
@@ -71,6 +71,11 @@
   .pv i{ color:#8a94a2; font-style:normal; margin-right:1px; font-size:11px; }
   .pop-foot{ margin-top:8px; font-size:11px; color:#7a8190; border-top:1px solid #eee; padding-top:6px; }
   .pop-foot a{ color:var(--blue); font-weight:800; }
+  .pop-cta{ margin-top:9px; padding-top:10px; border-top:1px solid #eee; text-align:center; }
+  .pop-cta .cta-t{ font-size:12.5px; color:#20242b; font-weight:800; margin-bottom:7px; }
+  .pop-cta .cta-b{ display:block; text-decoration:none; border-radius:7px; padding:8px; font-weight:800; font-size:13.5px; margin-top:5px; }
+  .pop-cta .cta-b.line{ background:#06C755; color:#fff; }
+  .pop-cta .cta-b.tel{ background:var(--blue); color:#fff; }
 
   /* address lookup */
   #addr-box{ display:flex; gap:6px; }
@@ -259,10 +264,15 @@ function buildZonePopup(p){
       return `<span class="pv">${area}${li}${k}</span>`;
     }).join('')+`</div>` : '';
   const n = vs.length || p.n_vill;
+  const _td = AGENT.tel.replace(/[^0-9+]/g,'');
+  const cta = `<div class="pop-cta"><div class="cta-t">🏠 想找這個學區的房子？免費諮詢</div>`+
+    `<a class="cta-b line" href="${esc(AGENT.line)}" target="_blank" rel="noopener">LINE 預約諮詢</a>`+
+    `<a class="cta-b tel" href="tel:${_td}">☎ ${esc(AGENT.name)}　${esc(AGENT.tel)}</a></div>`;
   return `<div class="pop-h">${p.school.replace(p.home,'')}</div>`+
     `<div class="pop-sub"><b>${p.level}</b> · ${p.home} · 學區共 <b>${n}</b> 里</div>`+
     body+
-    `<div class="pop-foot">交界依「鄰」細分，以官方公告為準　<a href="https://std.tn.edu.tw/sis/anonyquery/SchoolDistrict.aspx" target="_blank" rel="noopener">官方查詢 →</a></div>`;
+    `<div class="pop-foot">交界依「鄰」細分，以官方公告為準　<a href="https://std.tn.edu.tw/sis/anonyquery/SchoolDistrict.aspx" target="_blank" rel="noopener">官方查詢 →</a></div>`+
+    cta;
 }
 
 function refreshLabels(level){
