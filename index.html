@@ -236,7 +236,7 @@ function schoolIcon(){ return L.divIcon({ className:'sch-ic', html:'<svg width="
 function hue(i){ return (i*137.508)%360; }
 function colorFor(i){ return `hsl(${hue(i).toFixed(0)},62%,60%)`; }
 function strokeFor(i){ return `hsl(${hue(i).toFixed(0)},72%,33%)`; }
-function styleFn(i){ return { color:strokeFor(i), weight:1.6, fillColor:colorFor(i), fillOpacity:.5 }; }
+function styleFn(i){ return { color:strokeFor(i), weight:1.6, fillColor:colorFor(i), fillOpacity:.32 }; }
 
 function buildLayer(level, data){
   const schools = [...new Set(data.features.map(f=>f.properties.school))];
@@ -248,7 +248,7 @@ function buildLayer(level, data){
       const p = f.properties;
       l.bindTooltip(p.school.replace(p.home,''), {sticky:true, className:'zone-label', direction:'top', opacity:1});
       l.bindPopup(buildZonePopup(p), {maxWidth:344, maxHeight:380});
-      l.on('mouseover', ()=> l.setStyle({weight:3.2, color:'#12325a', fillOpacity:.68}));
+      l.on('mouseover', ()=> l.setStyle({weight:3.2, color:'#12325a', fillOpacity:.5}));
       l.on('mouseout',  ()=> lyr.resetStyle(l));
       const pt = SCHOOL_POINTS[p.school];
       let mk = null;
