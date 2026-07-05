@@ -84,6 +84,9 @@
   #addr-box input{ flex:1; border:1px solid #DCDDDD; border-radius:8px; padding:9px 10px; font-size:14px; outline:none; }
   #addr-box input:focus{ border-color:var(--blue); }
   #addr-box button{ border:0; background:var(--gold); color:#fff; border-radius:8px; padding:0 15px; font-weight:800; cursor:pointer; font-size:14px; }
+  #geo-btn{ display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:7px; border:1px solid var(--blue); background:#fff; color:var(--blue); border-radius:8px; padding:9px; font-weight:800; font-size:14px; cursor:pointer; }
+  #geo-btn:hover{ background:var(--grey-l); }
+  #geo-btn:disabled{ opacity:.6; cursor:default; }
   .rcard{ margin-top:9px; border-radius:10px; overflow:hidden; border:1px solid #DCDDDD; display:none; }
   .rcard.show{ display:block; }
   .rcard .rhead{ background:var(--blue); color:#fff; padding:7px 11px; font-size:13.5px; font-weight:800; }
@@ -158,6 +161,7 @@
       <input id="addr" type="search" placeholder="例：東區裕農路135號" autocomplete="off">
       <button onclick="lookupAddr()">查</button>
     </div>
+    <button id="geo-btn" onclick="geoLocate()">📍 用我目前的位置查學區</button>
     <div id="addr-msg" style="margin-top:5px;font-size:12px;color:#b3541e;font-weight:600"></div>
     <div id="rcard" class="rcard">
       <div class="rhead" id="rhead"></div>
@@ -414,6 +418,60 @@ async function lookupAddr(){
 }
 document.getElementById('addr').addEventListener('keydown',e=>{ if(e.key==='Enter') lookupAddr(); });
 
+/* ---- 定位查學區:GPS 點位落區(point-in-polygon) ---- */
+let GEO={gs:null,jh:null};
+function pnpoly(lon,lat,ring){
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+    if(((yi>lat)!==(yj>lat)) && (lon < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function inGeom(lon,lat,geom){
+  const polys = geom.type==='Polygon' ? [geom.coordinates] : (geom.type==='MultiPolygon' ? geom.coordinates : []);
+  for(const poly of polys){
+    if(!poly.length || !pnpoly(lon,lat,poly[0])) continue;      // 外環內
+    let inHole=false;
+    for(let h=1;h<poly.length;h++){ if(pnpoly(lon,lat,poly[h])){ inHole=true; break; } }
+    if(!inHole) return true;
+  }
+  return false;
+}
+function zoneAt(fc,lon,lat){
+  if(!fc||!fc.features) return null;
+  for(const f of fc.features){ if(inGeom(lon,lat,f.geometry)) return f.properties; }
+  return null;
+}
+function gpsTier(name,p){
+  const sch = p ? p.school.replace(p.home,'') : null;
+  const c = sch?'g':'r';
+  return `<div class="tier ${c}"><span class="dot ${c}"></span><div><div class="lvl2">${name}</div><div class="sch">${sch||'查無（可能在學區交界或範圍外）'}</div><div class="note">${sch?'里級參考，交界處以官方為準':'請改用地址查詢或查官方'}</div></div></div>`;
+}
+function geoLocate(){
+  const btn=document.getElementById('geo-btn'), msg=document.getElementById('addr-msg'), card=document.getElementById('rcard');
+  if(!navigator.geolocation){ msg.textContent='此裝置不支援定位'; return; }
+  if(!GEO.gs){ msg.textContent='地圖資料載入中，請稍候再試'; return; }
+  btn.disabled=true; btn.textContent='📍 定位中…'; msg.textContent='';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    btn.disabled=false; btn.textContent='📍 用我目前的位置查學區';
+    const lat=pos.coords.latitude, lon=pos.coords.longitude;
+    if(lat<22.7||lat>23.7||lon<119.9||lon>120.85){ msg.textContent='你目前不在台南市範圍內'; card.classList.remove('show'); return; }
+    const gp=zoneAt(GEO.gs,lon,lat), jp=zoneAt(GEO.jh,lon,lat);
+    const dist=(gp&&gp.home)||(jp&&jp.home)||'';
+    document.getElementById('rhead').textContent='📍 你目前的位置'+(dist?'（'+dist+'）':'');
+    document.getElementById('rbody').innerHTML=gpsTier('國小',gp)+gpsTier('國中',jp);
+    card.classList.add('show');
+    if(addrMarker) map.removeLayer(addrMarker);
+    const gs=gp?gp.school.replace(gp.home,''):'—', js=jp?jp.school.replace(jp.home,''):'—';
+    addrMarker=L.marker([lat,lon]).addTo(map).bindPopup(`<div class="pop-h">📍 你目前的位置</div>國小：${gs}<br>國中：${js}<div style="margin-top:6px;font-size:11px;color:#989DA0">製作：齊家不動產 ${esc(AGENT.name)}</div>`+ctaHtml(),{minWidth:230});
+    map.setView([lat,lon],16); addrMarker.openPopup();
+  }, err=>{
+    btn.disabled=false; btn.textContent='📍 用我目前的位置查學區';
+    msg.textContent = err.code===1 ? '定位被拒絕，請允許瀏覽器取用位置' : '定位失敗，請確認已開啟定位';
+  }, {enableHighAccuracy:true, timeout:12000, maximumAge:30000});
+}
+
 Promise.all([
   fetch('gs.geojson').then(r=>r.json()),
   fetch('jh.geojson').then(r=>r.json()),
@@ -424,6 +482,7 @@ Promise.all([
   fetch('school_points.json').then(r=>r.json())
 ]).then(([gs,jh,gsn,jhn,cent,sv,sp])=>{
   NLIN.gs=gsn; NLIN.jh=jhn; CENT=cent; SCHOOL_VILLAGES=sv; SCHOOL_POINTS=sp;
+  GEO.gs=gs; GEO.jh=jh;
   layers.gs = buildLayer('gs', gs);
   layers.jh = buildLayer('jh', jh);
   layers.gs.addTo(map);
