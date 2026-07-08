@@ -3,7 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>台南國中小學區地圖｜陪你買好房</title>
+<title>台南國中小學區地圖｜輸入地址查你家讀哪間國小、國中（115學年度）｜齊家不動產</title>
+<meta name="description" content="台南市國中小學區地圖：輸入完整地址，立刻查你家小孩讀哪一間國小、國中，精準到「鄰」。全台南 219 國小、68 國中學區，含自由學區、額滿（總量管制）學校，資料依台南市教育局 115 學年度學區公告。可 GPS 定位一鍵查、學區交界自動提醒。齊家不動產｜陪你買好房。">
+<meta name="keywords" content="台南學區地圖,台南國小學區,台南國中學區,學區查詢,地址查學區,門牌查學區,台南額滿學校,總量管制學校,自由學區,勝利國小學區,崇學國小學區,115學年度學區,台南明星學區,越區設籍,你家讀哪間學校">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="geo.region" content="TW-TNN"><meta name="geo.placename" content="台南市">
+<link rel="canonical" href="https://sdi-map.benebuyhouse.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="齊家不動產｜陪你買好房">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:url" content="https://sdi-map.benebuyhouse.com/">
+<meta property="og:title" content="台南國中小學區地圖｜輸入地址查你家讀哪間國小、國中（115學年度）">
+<meta property="og:description" content="輸入完整地址，精準到「鄰」查你家小孩讀哪間國小、國中。全台南 219 國小、68 國中，含自由學區、額滿學校，115 學年度台南市教育局資料。">
+<meta property="og:image" content="https://sdi-map.benebuyhouse.com/og-banner.jpg">
+<meta property="og:image:width" content="1600"><meta property="og:image:height" content="900">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="台南國中小學區地圖｜輸入地址查你家讀哪間國中小">
+<meta name="twitter:description" content="輸入地址或 GPS 定位，精準到「鄰」查學區。含自由學區、額滿學校，115 學年度資料。">
+<meta name="twitter:image" content="https://sdi-map.benebuyhouse.com/og-banner.jpg">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -183,13 +200,19 @@
     <label class="row toggle"><input type="checkbox" id="pins" checked onchange="togglePins()"> 顯示學校位置 📍</label>
     <label class="row toggle" style="margin-top:7px"><input type="checkbox" id="labels" onchange="toggleLabels()"> 顯示校名標籤</label>
     <div class="muted" style="margin-top:6px">點學校圖示或學區看該校資訊（里/鄰）。每個學區以顏色區分。</div>
+    <div style="margin-top:9px;border-top:1px solid var(--grey);padding-top:9px">
+      <div style="font-weight:800;color:var(--blue);font-size:12.5px;margin-bottom:6px">查詢結果怎麼看</div>
+      <div class="row" style="font-size:12px;color:#062345;margin-bottom:4px"><span class="dot g" style="width:10px;height:10px;flex:none"></span>單一學區：整里同一校，最明確</div>
+      <div class="row" style="font-size:12px;color:#062345;margin-bottom:4px"><span class="dot y" style="width:10px;height:10px;flex:none"></span>⭐ 自由學區：一里可自選多校</div>
+      <div class="row" style="font-size:12px;color:#062345"><span class="dot y" style="width:10px;height:10px;flex:none"></span>里內依鄰分校：請輸入完整地址精查到「鄰」</div>
+    </div>
   </div>
   <div class="sec">
-    <div class="disc"><b>學區僅供參考｜以官方為準。</b>本圖以「里」為單位上色，官方學區部分切至「鄰／門牌」，交界處請務必查官方系統確認。</div>
+    <div class="disc"><b>學區僅供參考｜以官方為準（115 學年度）。</b>本圖以「里」為單位上色，官方學區部分切至「鄰／門牌」，交界處請務必查官方系統確認。學區每年得調整。</div>
     <a class="btn-official" href="https://std.tn.edu.tw/sis/anonyquery/SchoolDistrict.aspx" target="_blank" rel="noopener">🔎 查官方學區（台南市教育局）</a>
   </div>
   <div class="sec muted">
-    學區：台南市教育局學區查詢系統（官方，鄰級）；門牌：台南市政府門牌坐標開放資料；村里界：內政部 2026／04。
+    學區：台南市教育局學區查詢系統（官方，鄰級，115 學年度）；門牌：台南市政府門牌坐標開放資料；村里界：內政部 2026／04。
   </div>
 </div>
 
@@ -378,18 +401,27 @@ function findEntry(data,p){
 }
 
 function nlinLookup(T,dist,li,kin){
-  const rec=T&&T[dist+'|'+li]; if(!rec) return {status:'grey',schools:[]};
+  const rec=T&&T[dist+'|'+li]; if(!rec) return {status:'grey',schools:[],kind:'none'};
   const k=String(kin);
   const s=[...new Set([...(rec.all||[]),...((rec.kin&&rec.kin[k])||[])])].sort();
-  if(!s.length) return {status:'grey',schools:[]};
-  return {status: s.length===1?'green':'yellow', schools:s};
+  if(!s.length) return {status:'grey',schools:[],kind:'none'};
+  // 分類:自由學區(整里可選多校)=all多校; 依鄰分校=不同鄰對到不同校
+  let kind='single';
+  if((rec.all||[]).length>1) kind='free';
+  else if(rec.kin && Object.keys(rec.kin).length){
+    const sets=new Set(Object.values(rec.kin).map(a=>[...a].sort().join('/')));
+    if(sets.size>1 || s.length>1) kind='kin';
+  }
+  if(s.length>1 && kind==='single') kind='free';
+  return {status: s.length===1?'green':'yellow', schools:s, kind};
 }
 
 function tierHtml(name,r){
   const c=r.status==='green'?'g':(r.status==='yellow'?'y':'r');
   let sch,note;
-  if(r.status==='green'){ sch=r.schools[0]; note='綠燈：里內單一學校，參考度高'; }
-  else if(r.status==='yellow'){ sch=r.schools.join(' 或 ')||'—'; note='交界／共用學區，務必以官方為準'; }
+  if(r.status==='green'){ sch=r.schools[0]; note = r.kind==='kin'?'此里依「鄰」分校，你家所在鄰讀此校（精準）':'里內單一學校，參考度高'; }
+  else if(r.status==='yellow'){ sch=r.schools.join(' 或 ')||'—';
+    note = r.kind==='free'?'⭐ 自由學區：本里可自選以上學校，擇一即可':'里內依「鄰」分校／交界共用，務必以官方為準'; }
   else { sch='查無資料'; note='本圖無此里學區資料，請查官方'; }
   return `<div class="tier ${c}"><span class="dot ${c}"></span><div><div class="lvl2">${name}</div><div class="sch">${sch}</div><div class="note">${note}</div></div></div>`;
 }
